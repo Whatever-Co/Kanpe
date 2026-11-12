@@ -28,7 +28,15 @@ Not built yet: mic Japanese → English TTS routed into the meeting (virtual aud
   so the last words commit. Verified 2026-11-12 with `say` audio through the class in a CLI; no TCC prompt.
   Accuracy 2026-11-12, 5 min each, reference = Soniox async on the same recording: English online remote
   WER Soniox RT 16.7% vs on-device 20.1%; Japanese 3-person room mic CER 21.3% vs 32.1% (with more
-  nonsense words, and all speakers merged into long lines). Soniox stays the default
+  nonsense words, and all speakers merged into long lines). Soniox stays the default. Other on-device
+  models on the same clips (soniqo `speech` CLI 0.0.29): EN WER Nemotron 3.5 streaming 21.9%, Qwen3-ASR 1.7B
+  22.6% (25 s chunks), Whisper large-v3-turbo 27.5%; JA CER Qwen3-ASR 36.0% (25 s chunks, not live), Nemotron
+  45.1%, Whisper 72.3% (repetition loops in 2 of 12 chunks). With VAD segmentation Qwen3 dropped quiet
+  room speakers (68%). Apple SpeechTranscriber was the best on-device option for live Japanese.
+  First live on-device meeting (2026-11-12, 36 min, Japanese online call): remote CER 16.7% against Soniox
+  async on the same recording, 13.6–20.4% per 6-minute window, no drift. Mic CER is not meaningful there:
+  the user spoke little, and Soniox async also transcribed faint background speech that Apple ignores
+  (replaying the mic offline gave the same output as live, so the live path did not stall)
 - `MeetingLanguages` (Settings, UserDefaults `remoteLanguage` / `micLanguage` / `targetLanguage`, defaults
   en / ja / ja): the system-audio language, the mic language (`.me` and `.room`) and the translation
   target, used live and by retranscription. Group streams always translate — Soniox leaves speech already
