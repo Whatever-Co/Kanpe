@@ -23,10 +23,17 @@ Not built yet: mic Japanese → English TTS routed into the meeting (virtual aud
   person, not translated
 - `TranscriptionEngine` (protocol) has two implementations, chosen in Settings (`transcriptionBackend`,
   next Start): Soniox, or `AppleSpeechEngine` = macOS 26 SpeechAnalyzer + SpeechTranscriber on device
-  (no key, no translation, no diarization; en-US for system audio, ja-JP for the mic; the language model
-  downloads on first Start). It emits Soniox-shaped tokens — volatile results as non-final, each final
+  (no key, no translation, no diarization; the language model downloads on first Start). It emits Soniox-shaped tokens — volatile results as non-final, each final
   result as final + `<end>` — so `UtteranceAssembler` is shared. Pausing calls `finalize(through: nil)`
-  so the last words commit. Verified 2026-11-12 with `say` audio through the class in a CLI; no TCC prompt
+  so the last words commit. Verified 2026-11-12 with `say` audio through the class in a CLI; no TCC prompt.
+  Accuracy 2026-11-12, 5 min each, reference = Soniox async on the same recording: English online remote
+  WER Soniox RT 16.7% vs on-device 20.1%; Japanese 3-person room mic CER 21.3% vs 32.1% (with more
+  nonsense words, and all speakers merged into long lines). Soniox stays the default
+- `MeetingLanguages` (Settings, UserDefaults `remoteLanguage` / `micLanguage` / `targetLanguage`, defaults
+  en / ja / ja): the system-audio language, the mic language (`.me` and `.room`) and the translation
+  target, used live and by retranscription. Group streams always translate — Soniox leaves speech already
+  in the target language untranslated per token, and a hybrid room can mix languages. `language_hints` =
+  the stream's language first, then the other configured ones (the defaults reproduce the old fixed hints)
 - `Sources/Meeting/MeetingSession.swift` — one Start→Stop meeting: one or two
   streams per `MeetingMode` (below), each = audio source + transcription engine + recorder + assembler
 - `Sources/Meeting/ContextLibrary.swift` — per-meeting Soniox `context` sets: each

@@ -26,6 +26,10 @@ final class MeetingSession: ObservableObject {
     @Published var backend = TranscriptionBackend.stored {
         didSet { UserDefaults.standard.set(backend.rawValue, forKey: "transcriptionBackend") }
     }
+    /// 会議の言語。次の開始（と再文字起こし）から効く。
+    @Published var languages = MeetingLanguages.stored {
+        didSet { languages.store() }
+    }
     /// 開始できるか。Soniox で文字起こしするときだけ Soniox のキーが要る。
     var canStart: Bool { backend == .onDevice || hasKey }
     @Published private(set) var folder: URL?
@@ -150,12 +154,12 @@ final class MeetingSession: ObservableObject {
 
         var problems: [String] = []
         if mode.usesSystemAudio,
-           let problem = await startStream(.remote, source: SystemAudioCaptureSource(), language: "en", key: key,
+           let problem = await startStream(.remote, source: SystemAudioCaptureSource(), key: key,
                                      context: context, folder: folder) {
             problems.append("相手: \(problem)")
         }
         if !startCancelled, await Permissions.requestMicrophone(), !startCancelled {
-            if let problem = await startStream(mode.micSpeaker, source: MicCaptureSource(), language: "ja", key: key,
+            if let problem = await startStream(mode.micSpeaker, source: MicCaptureSource(), key: key,
                                          context: context, folder: folder) {
                 problems.append("マイク: \(problem)")
             }
@@ -178,20 +182,21 @@ final class MeetingSession: ObservableObject {
     }
 
     /// 失敗したら理由を返す。
-    private func startStream(_ speaker: Speaker, source: AudioCaptureSource, language: String,
+    private func startStream(_ speaker: Speaker, source: AudioCaptureSource,
                              key: String, context: [String: Any]?, folder: URL) async -> String? {
         let engine: any TranscriptionEngine
         switch backend {
         case .soniox:
-            // 話者分離と翻訳は複数人の音源だけ。自分（マイク）は 1 人で、自分の発言を日本語に訳す必要もない。
-            engine = SonioxTranslationEngine(apiKey: key, sourceLanguage: language, targetLanguage: "ja",
-                                             diarization: speaker.isGroup, translate: speaker.isGroup,
+            // 話者分離と翻訳は複数人の音源だけ。自分（マイク）は 1 人で、自分の発言を訳す必要もない。
+            engine = SonioxTranslationEngine(apiKey: key, languageHints: languages.hints(for: speaker),
+                                             targetLanguage: languages.target,
+                                             diarization: speaker.isGroup, translate: languages.translates(speaker),
                                              context: context,
                                              // Soniox: endpoint 検出は話者分離の精度を下げる。複数人の音源では切り、
                                              // 行は話者の交代と間（idleCommit）で区切る。
                                              endpointDetection: !speaker.isGroup)
         case .onDevice:
-            engine = AppleSpeechEngine(language: language)
+            engine = AppleSpeechEngine(language: languages.source(for: speaker))
         }
         let recorder = AudioFileRecorder(folder: folder, name: speaker.recordingName)
         let stream = Stream(speaker: speaker, source: source, engine: engine, recorder: recorder)
@@ -351,7 +356,8 @@ final class MeetingSession: ObservableObject {
         guard retranscribeStatus == nil, let key = KeychainStore.soniox.load() else { return }
         var context: [String: Any]?
         if let contextName { context = ContextLibrary.split(try? ContextLibrary.load(contextName)).soniox }
-        var job = Retranscriber(sonioxKey: key, anthropicKey: KeychainStore.anthropic.load(), context: context)
+        var job = Retranscriber(sonioxKey: key, anthropicKey: KeychainStore.anthropic.load(), context: context,
+                                languages: languages)
         job.progress = { [weak self] message in
             Task { @MainActor in self?.retranscribeStatus = message }
         }
