@@ -1,0 +1,8 @@
+build/
+DerivedData/
+.DS_Store
+*.xcodeproj/
+Config/Info.plist
+Config/Kanpe.entitlements
+Config/Local.xcconfig
+CLAUDE.local.md

@@ -1,0 +1,27 @@
+name: Build
+
+on:
+  pull_request:
+  push:
+    branches: [master]
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  build:
+    runs-on: macos-26
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v5
+      - name: Install XcodeGen
+        run: brew install xcodegen
+      - name: Generate project
+        run: xcodegen generate
+      # The signing identity lives only on the developers' Macs; CI checks that it compiles.
+      - name: Build
+        run: >
+          xcodebuild -project Kanpe.xcodeproj -scheme Kanpe -configuration Debug
+          -derivedDataPath build CODE_SIGNING_ALLOWED=NO CODE_SIGN_IDENTITY=""
+          build

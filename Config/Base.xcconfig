@@ -1,0 +1,3 @@
+// Per-machine overrides that must not be committed, e.g. the exact development certificate:
+//   CODE_SIGN_IDENTITY[config=Debug] = Apple Development: Your Name (ABCDE12345)
+#include? "Local.xcconfig"

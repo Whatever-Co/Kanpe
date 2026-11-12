@@ -1,0 +1,73 @@
+name: Kanpe
+options:
+  bundleIdPrefix: co.whatever
+  deploymentTarget:
+    macOS: "26.0"
+  createIntermediateGroups: true
+  groupSortPosition: top
+packages:
+  Sparkle:
+    url: https://github.com/sparkle-project/Sparkle
+    from: 2.10.1
+settings:
+  base:
+    SWIFT_VERSION: "5.0"
+    MARKETING_VERSION: "0.1.0"
+    CURRENT_PROJECT_VERSION: "1"
+    # A stable identity keeps Keychain and audio-capture approvals across rebuilds
+    # (ad-hoc signatures change every build). With several Apple Development certificates in
+    # the keychain, name the exact one in Config/Local.xcconfig (gitignored, see Config/Base.xcconfig).
+    DEVELOPMENT_TEAM: "G5G54TCH8W"
+    CODE_SIGN_STYLE: Manual
+    CODE_SIGN_IDENTITY: "Apple Development"
+    ENABLE_HARDENED_RUNTIME: NO
+  configs:
+    # Release builds are distributed (scripts/release.sh): Developer ID + hardened runtime,
+    # which notarization requires.
+    Release:
+      CODE_SIGN_IDENTITY: "Developer ID Application: Whatever Co. (G5G54TCH8W)"
+      ENABLE_HARDENED_RUNTIME: YES
+      OTHER_CODE_SIGN_FLAGS: --timestamp
+targets:
+  Kanpe:
+    type: application
+    platform: macOS
+    deploymentTarget: "26.0"
+    sources:
+      - Sources
+    configFiles:
+      Debug: Config/Base.xcconfig
+      Release: Config/Base.xcconfig
+    dependencies:
+      - package: Sparkle
+    entitlements:
+      path: Config/Kanpe.entitlements
+      properties:
+        # Hardened runtime blocks the microphone without this.
+        com.apple.security.device.audio-input: true
+    info:
+      path: Config/Info.plist
+      properties:
+        CFBundleDisplayName: Kanpe
+        # From build settings, so scripts/release.sh can set them per release.
+        CFBundleShortVersionString: $(MARKETING_VERSION)
+        CFBundleVersion: $(CURRENT_PROJECT_VERSION)
+        LSMinimumSystemVersion: "26.0"
+        NSHighResolutionCapable: true
+        NSAudioCaptureUsageDescription: "会議の相手の声（システム音声出力）を翻訳するために使用します。"
+        NSMicrophoneUsageDescription: "自分の発言を録音して文字起こしするために使用します。"
+        # Sparkle: the appcast is attached to the newest GitHub release (scripts/release.sh).
+        SUFeedURL: https://github.com/Whatever-Co/Kanpe/releases/latest/download/appcast.xml
+        SUPublicEDKey: 4CBYNI6G1gRzI5QBGFZH4kYmmWd1HsZbelgpEtiBiY8=
+        SUEnableAutomaticChecks: true
+        # Cognee (optional self-hosted memory search) may be plain http on a Tailscale network, reached by
+        # its MagicDNS name: NSAllowsLocalNetworking does not cover Tailscale's 100.x addresses.
+        NSAppTransportSecurity:
+          NSExceptionDomains:
+            ts.net:
+              NSIncludesSubdomains: true
+              NSExceptionAllowsInsecureHTTPLoads: true
+    settings:
+      base:
+        PRODUCT_BUNDLE_IDENTIFIER: co.whatever.Kanpe
+        PRODUCT_NAME: Kanpe
