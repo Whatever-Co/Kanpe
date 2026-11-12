@@ -19,6 +19,13 @@ struct SettingsView: View {
                 Text("Mac 内はキー不要で、音声が Mac の外に出ない。翻訳と話者の聞き分けはしない。次の開始から切り替わる。")
             }
             Section {
+                languagePicker("相手の言語", selection: $session.languages.remote)
+                languagePicker("マイクの言語", selection: $session.languages.mic)
+                languagePicker("訳す先", selection: $session.languages.target)
+            } footer: {
+                Text("相手はシステム音声（オンライン会議の相手）、マイクは自分と同じ部屋の人。訳す先の言語で話された部分は訳さない。訳すのは Soniox のときだけ（自分の発言は訳さない）。")
+            }
+            Section {
                 keyField("Soniox", text: $sonioxKey, check: sonioxCheck) {
                     session.saveKey(sonioxKey)
                     sonioxKey = ""
@@ -44,6 +51,12 @@ struct SettingsView: View {
             async let soniox: Void = verifySoniox()
             async let anthropic: Void = verifyAnthropic()
             _ = await (soniox, anthropic)
+        }
+    }
+
+    private func languagePicker(_ title: String, selection: Binding<String>) -> some View {
+        Picker(title, selection: selection) {
+            ForEach(MeetingLanguages.choices, id: \.code) { Text($0.label).tag($0.code) }
         }
     }
 

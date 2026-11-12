@@ -9,7 +9,7 @@ final class SonioxTranslationEngine: TranscriptionEngine {
     private let endpoint = URL(string: "wss://stt-rt.soniox.com/transcribe-websocket")!
     private let model = "stt-rt-v5"
     private let apiKey: String
-    private let sourceLanguage: String
+    private let languageHints: [String]
     private let targetLanguage: String
     private let diarization: Bool
     private let translate: Bool
@@ -41,11 +41,11 @@ final class SonioxTranslationEngine: TranscriptionEngine {
     private var keepalive: DispatchSourceTimer?
     private let maxReconnectDelay: TimeInterval = 8
 
-    init(apiKey: String, sourceLanguage: String = "en", targetLanguage: String = "ja",
+    init(apiKey: String, languageHints: [String], targetLanguage: String,
          diarization: Bool = false, translate: Bool = true, context: [String: Any]? = nil,
          endpointDetection: Bool = true) {
         self.apiKey = apiKey
-        self.sourceLanguage = sourceLanguage
+        self.languageHints = languageHints
         self.targetLanguage = targetLanguage
         self.diarization = diarization
         self.translate = translate
@@ -96,7 +96,7 @@ final class SonioxTranslationEngine: TranscriptionEngine {
             "sample_rate": 16000,
             "num_channels": 1,
             // 会議では日英が混ざる（相手も自分も）。主の言語を先頭に、両方をヒントに入れる。
-            "language_hints": [sourceLanguage] + ["en", "ja"].filter { $0 != sourceLanguage },
+            "language_hints": languageHints,
             "enable_endpoint_detection": usesEndpointDetection, // true なら <end> で発話を区切る
             "enable_speaker_diarization": diarization,
         ]

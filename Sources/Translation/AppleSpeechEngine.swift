@@ -25,10 +25,16 @@ final class AppleSpeechEngine: TranscriptionEngine {
         let errorDescription: String?
     }
 
-    /// `language` は Soniox と同じ "en" / "ja"。
+    /// `language` は Soniox と同じ言語コード（"en"、"ja" など）。
     init(language: String) {
-        localeID = language == "ja" ? "ja-JP" : "en-US"
+        localeID = Self.regions[language].map { "\(language)-\($0)" } ?? language
     }
+
+    /// 言語コードだけでは地域が決まらないので、よく使う地域を補う。
+    private static let regions = [
+        "en": "US", "ja": "JP", "zh": "CN", "ko": "KR", "es": "ES", "fr": "FR", "de": "DE",
+        "pt": "BR", "it": "IT", "vi": "VN", "th": "TH", "id": "ID",
+    ]
 
     func start(onTokens: @escaping ([SonioxResponse.Token]) -> Void,
                onError: @escaping (String) -> Void) async throws {

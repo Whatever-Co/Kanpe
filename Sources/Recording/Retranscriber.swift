@@ -14,6 +14,7 @@ struct Retranscriber {
     let sonioxKey: String
     let anthropicKey: String?
     let context: [String: Any]?
+    let languages: MeetingLanguages
     /// 進み具合（画面の表示用）。
     var progress: (String) -> Void = { _ in }
 
@@ -46,7 +47,7 @@ struct Retranscriber {
                 continue
             }
             let start = try recording.url.resourceValues(forKeys: [.creationDateKey]).creationDate ?? Date()
-            let tokens = try await transcribe(recording.url, group: recording.speaker.isGroup)
+            let tokens = try await transcribe(recording.url, speaker: recording.speaker)
             lines += Self.lines(from: tokens, speaker: recording.speaker, start: start)
         }
         lines.sort { $0.startedAt < $1.startedAt }
@@ -101,17 +102,19 @@ struct Retranscriber {
     }
 
     /// アップロード → 文字起こし → 完了待ち → 取得。終わったら Soniox 上のファイルと結果を消す。
-    private func transcribe(_ file: URL, group: Bool) async throws -> [Token] {
+    private func transcribe(_ file: URL, speaker: Speaker) async throws -> [Token] {
         let fileID = try await upload(file)
         defer { Task { try? await request("DELETE", "files/\(fileID)") } }
 
         var config: [String: Any] = [
             "model": "stt-async-v5",
             "file_id": fileID,
-            "language_hints": ["ja", "en"],
-            "enable_speaker_diarization": group,
+            "language_hints": languages.hints(for: speaker),
+            "enable_speaker_diarization": speaker.isGroup,
         ]
-        if group { config["translation"] = ["type": "one_way", "target_language": "ja"] }
+        if languages.translates(speaker) {
+            config["translation"] = ["type": "one_way", "target_language": languages.target]
+        }
         if let context { config["context"] = context }
 
         let created = try await request("POST", "transcriptions", json: config)
