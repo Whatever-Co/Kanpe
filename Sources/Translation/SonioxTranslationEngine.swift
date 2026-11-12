@@ -86,11 +86,13 @@ final class SonioxTranslationEngine: TranscriptionEngine {
         oldTask?.cancel(with: .goingAway, reason: nil)
         oldSession?.invalidateAndCancel()
         let session = URLSession(configuration: .default)
-        let task = session.webSocketTask(with: endpoint)
+        // キーは接続のヘッダに載せる。開始メッセージの api_key は 2027-01-15 から拒否される。
+        var request = URLRequest(url: endpoint)
+        request.setValue("Bearer \(apiKey)", forHTTPHeaderField: "Authorization")
+        let task = session.webSocketTask(with: request)
         task.resume()
 
         var config: [String: Any] = [
-            "api_key": apiKey,
             "model": model,
             "audio_format": "pcm_s16le", // pcm_ 接頭辞が必須（s16le 単体は不可）
             "sample_rate": 16000,
