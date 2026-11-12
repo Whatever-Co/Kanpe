@@ -44,6 +44,8 @@ Not built yet: mic Japanese → English TTS routed into the meeting (virtual aud
   the stream's language first, then the other configured ones (the defaults reproduce the old fixed hints)
 - `Sources/Meeting/MeetingSession.swift` — one Start→Stop meeting: one or two
   streams per `MeetingMode` (below), each = audio source + transcription engine + recorder + assembler
+- The Soniox key goes in the `Authorization` header of the WebSocket request; `api_key` in the start
+  message is refused from 2027-01-15 (URLSession does send the header despite listing it as reserved)
 - `Sources/Meeting/ContextLibrary.swift` — per-meeting Soniox `context` sets: each
   `~/Documents/Kanpe/Contexts/<name>.json` is a Soniox `context` object verbatim
   (`general` / `text` / `terms` / `translation_terms`, max ~10k chars), picked from the toolbar
