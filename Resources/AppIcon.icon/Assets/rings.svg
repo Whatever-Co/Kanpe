@@ -1,0 +1,11 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1024" height="1024" viewBox="0 0 1024 1024">
+  <g transform="translate(0 -40) rotate(-6 512 540)" fill="none" stroke="#3A3F4B" stroke-width="16" stroke-linecap="round">
+    <path d="M262 300 V240 a22 22 0 0 1 44 0 V284"/>
+    <path d="M342 300 V240 a22 22 0 0 1 44 0 V284"/>
+    <path d="M422 300 V240 a22 22 0 0 1 44 0 V284"/>
+    <path d="M502 300 V240 a22 22 0 0 1 44 0 V284"/>
+    <path d="M582 300 V240 a22 22 0 0 1 44 0 V284"/>
+    <path d="M662 300 V240 a22 22 0 0 1 44 0 V284"/>
+    <path d="M742 300 V240 a22 22 0 0 1 44 0 V284"/>
+  </g>
+</svg>
