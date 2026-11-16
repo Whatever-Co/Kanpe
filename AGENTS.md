@@ -134,6 +134,9 @@ Not built yet: mic Japanese → English TTS routed into the meeting (virtual aud
   `BotAvatar`/`VoiceStyle`, translations under originals). Light theme only
 - `Sources/Recording/` — `AudioFileRecorder` (AAC in the source's native format; a format
   change mid-meeting starts `name-2.m4a`), `TranscriptFile` (Markdown)
+- `Resources/AppIcon.icon` — the app icon, an Icon Composer bundle (`icon.json` + SVG layers book /
+  rings / marker, editable in Icon Composer.app). Its name must match `ASSETCATALOG_COMPILER_APPICON_NAME`
+  in `project.yml`. After swapping an installed build, `lsregister -f` the app if the Dock keeps the old icon
 - `Sources/App/` — the window floats above the meeting app only while recording, otherwise it is a
   normal window (`WindowLevel` sets `NSWindow.level`; the SwiftUI `.windowLevel` scene modifier is
   fixed at launch). Light theme only. Follows the
