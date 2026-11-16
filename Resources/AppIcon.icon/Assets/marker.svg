@@ -1,0 +1,11 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1024" height="1024" viewBox="0 0 1024 1024">
+  <g transform="translate(0 -40) rotate(-6 512 540)" fill="none" stroke-linecap="round" stroke-linejoin="round">
+    <!-- handwritten line 1 -->
+    <path stroke="#1F2330" stroke-width="30" d="M270 420 c30 -40 50 40 80 0 s50 -40 80 0 s40 40 70 -5 s50 -35 80 5 s45 30 75 -10 s40 -20 70 5"/>
+    <!-- handwritten line 2 -->
+    <path stroke="#1F2330" stroke-width="30" d="M270 540 c30 -40 50 40 80 0 s50 -40 80 0 s40 40 70 -5 s45 -30 75 5"/>
+    <!-- red underline + arrow -->
+    <path stroke="#E8392E" stroke-width="34" d="M268 690 C400 660 560 700 700 668"/>
+    <path stroke="#E8392E" stroke-width="34" d="M640 610 L712 666 L652 732"/>
+  </g>
+</svg>
